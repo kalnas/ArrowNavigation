@@ -12,6 +12,25 @@ var ArrowNavigation = (function() {
         };
     }
 
+    function getLocation(elm) {
+        var coords = elm.getAttribute('data-coords').split(',');
+        return { col: Number(coords[0]), row: Number(coords[1]) };
+    }
+
+    function focusNode(col, row) {
+        var node = document.querySelector('input[data-coords="' +  col + ',' + row +'"]');
+
+        if (node) {
+            node.focus();
+        }
+
+        return document.activeElement === node;
+    }
+
+    function compare(a, b) {
+        return a - b;
+    }
+
     instance.updateOffsets = function() {
         var rowOffsetsSet = new Set(),
             colOffsetsSet = new Set();
@@ -28,8 +47,8 @@ var ArrowNavigation = (function() {
         rowOffsets = [...rowOffsetsSet];
         colOffsets = [...colOffsetsSet];
 
-        rowOffsets.sort(function(a, b) { return a - b; });
-        colOffsets.sort(function(a, b) { return a - b; });
+        rowOffsets.sort(compare);
+        colOffsets.sort(compare);
     };
 
     instance.keyEvent = function(e) {
@@ -42,57 +61,45 @@ var ArrowNavigation = (function() {
             return;
         }
 
-        var coords = this.getAttribute('data-coords').split(','),
-            col = Number(coords[0]),
-            row = Number(coords[1]),
-            colIndex = colOffsets.indexOf(col),
-            rowIndex = rowOffsets.indexOf(row),
-            node;
-
-        function getNode(col, row) {
-            return document.querySelector('input[data-coords="' +  col + ',' + row +'"]');
-        }
+        var location = getLocation(this),
+            colIndex = colOffsets.indexOf(location.col),
+            rowIndex = rowOffsets.indexOf(location.row),
+            receivedFocus = false;
 
         switch (e.which) {
             case KEY_LEFT:
-                while (!node && colIndex > 0) {
+                while (!receivedFocus && colIndex > 0) {
                     colIndex--;
-                    node = getNode(colOffsets[colIndex], row);
+                    receivedFocus = focusNode(colOffsets[colIndex], location.row);
                 }
 
                 break;
             case KEY_UP:
-                while (!node && rowIndex > 0) {
+                while (!receivedFocus && rowIndex > 0) {
                     rowIndex--;
-                    node = getNode(col, rowOffsets[rowIndex]);
+                    receivedFocus = focusNode(location.col, rowOffsets[rowIndex]);
                 }
 
                 break;
             case KEY_RIGHT:
-                while (!node && colIndex < colOffsets.length) {
+                while (!receivedFocus && colIndex < colOffsets.length) {
                     colIndex++;
-                    node = getNode(colOffsets[colIndex], row);
+                    receivedFocus = focusNode(colOffsets[colIndex], location.row);
                 }
 
                 break;
             case KEY_DOWN:
-                while (!node && rowIndex < rowOffsets.length) {
+                while (!receivedFocus && rowIndex < rowOffsets.length) {
                     rowIndex++;
-                    node = getNode(col, rowOffsets[rowIndex]);
+                    receivedFocus = focusNode(location.col, rowOffsets[rowIndex]);
                 }
 
                 break;
         }
 
-        if (node) {
-            node.focus();
+        if (receivedFocus) {
             e.preventDefault();
         }
-    };
-
-    instance.setup = function() {
-        window.onresize = instance.updateOffsets;
-        instance.updateOffsets();
     };
 
     return instance;

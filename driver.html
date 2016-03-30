@@ -1,5 +1,20 @@
 <html>
 <script src="ArrowNavigation.js"></script>
+<script>
+    window.onresize = ArrowNavigation.updateOffsets;
+
+    function ready() {
+        ArrowNavigation.updateOffsets();
+
+        document.getElementById('cb1').addEventListener('click', function() {
+            document.getElementById('fs1').setAttribute('style',
+                document.getElementById('cb1').checked ? 'visibility: hidden' : '');
+
+            ArrowNavigation.updateOffsets();
+        });
+    }
+</script>
+
 <head>
 <style>
 
@@ -12,7 +27,7 @@ fieldset.wide {
     width: 3000px;
 }
 
-input {
+input[type=text] {
     border-style: double;
     height: 50px;
     width: 300px;
@@ -25,10 +40,14 @@ input[type=text]:focus {
   border: 3px solid red;
 }
 
+input[type=checkbox] {
+    margin-left: 100px;
+}
+
 </style>
 <title>Arrow Navigation</title>
 </head>
-<body onload="ArrowNavigation.setup()">
+<body onload="ready()">
 
 <fieldset>
 <input type='text'></input>
@@ -52,7 +71,8 @@ input[type=text]:focus {
 <input type='text'></input>
 </fieldset>
 
-<fieldset>
+<input type="checkbox" id="cb1"> Hide This </input>
+<fieldset id="fs1">
 <input type='text'></input>
 <input type='text'></input>
 <input type='text'></input>
