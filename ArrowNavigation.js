@@ -12,13 +12,8 @@ var ArrowNavigation = (function() {
         };
     }
 
-    function getLocation(elm) {
-        var coords = elm.getAttribute('data-coords').split(',');
-        return { col: Number(coords[0]), row: Number(coords[1]) };
-    }
-
     function focusNode(col, row) {
-        var node = document.querySelector('input[data-coords="' +  col + ',' + row +'"]');
+        var node = document.querySelector(`input[data-coords="${col},${row}"]`);
 
         if (node) {
             node.focus();
@@ -61,43 +56,45 @@ var ArrowNavigation = (function() {
             return;
         }
 
-        var location = getLocation(this),
-            colIndex = colOffsets.indexOf(location.col),
-            rowIndex = rowOffsets.indexOf(location.row),
+        var coords = this.getAttribute('data-coords').split(','),
+            col = Number(coords[0]),
+            row = Number(coords[1]),
+            colIndex = colOffsets.indexOf(col),
+            rowIndex = rowOffsets.indexOf(row),
             receivedFocus = false;
 
         switch (e.which) {
             case KEY_LEFT:
                 while (!receivedFocus && colIndex > 0) {
                     colIndex--;
-                    receivedFocus = focusNode(colOffsets[colIndex], location.row);
+                    receivedFocus = focusNode(colOffsets[colIndex], row);
                 }
 
                 break;
             case KEY_UP:
                 while (!receivedFocus && rowIndex > 0) {
                     rowIndex--;
-                    receivedFocus = focusNode(location.col, rowOffsets[rowIndex]);
+                    receivedFocus = focusNode(col, rowOffsets[rowIndex]);
                 }
 
                 break;
             case KEY_RIGHT:
                 while (!receivedFocus && colIndex < colOffsets.length) {
                     colIndex++;
-                    receivedFocus = focusNode(colOffsets[colIndex], location.row);
+                    receivedFocus = focusNode(colOffsets[colIndex], row);
                 }
 
                 break;
             case KEY_DOWN:
                 while (!receivedFocus && rowIndex < rowOffsets.length) {
                     rowIndex++;
-                    receivedFocus = focusNode(location.col, rowOffsets[rowIndex]);
+                    receivedFocus = focusNode(col, rowOffsets[rowIndex]);
                 }
 
                 break;
         }
 
-        if (receivedFocus) {
+        if(receivedFocus) {
             e.preventDefault();
         }
     };
