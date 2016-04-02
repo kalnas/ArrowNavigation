@@ -1,6 +1,7 @@
 <html>
 <script src="ArrowNavigation.js"></script>
 <script>
+    ArrowNavigation.setup(50, true);
     window.onresize = ArrowNavigation.updateOffsets;
 
     function ready() {
@@ -14,9 +15,10 @@
         });
     }
 
-    function addInput(num) {
+    function addInput(num, shift) {
+        var marginStr = shift ? "margin-left: 10px" : "";
         for (var i = 0; i < num; i++) {
-            document.write("<input type='text'></input>");
+            document.write(`<input style='${marginStr}' type='text'></input>`);
         }
     }
 </script>
@@ -77,7 +79,7 @@ input[type=checkbox] {
 </fieldset>
 
 <fieldset>
-<script> addInput(6); </script>
+<script> addInput(6, true); </script>
 </fieldset>
 
 <fieldset>

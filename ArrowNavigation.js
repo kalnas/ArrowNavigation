@@ -26,21 +26,33 @@ var ArrowNavigation = (function() {
         return a - b;
     }
 
+    Array.prototype.addFuzzyUnique = function(value, tolerance) {
+        value = Math.round(value);
+        for(var i = 0; i < this.length; i++) {
+            if (Math.abs(this[i] - value) <= tolerance) {
+                return this[i];
+            }
+        }
+
+        this.push(value);
+        return value;
+    };
+
+    var tolerance_ = 0;
+    var debug_ = false;
     instance.updateOffsets = function() {
-        var rowOffsetsSet = new Set(),
-            colOffsetsSet = new Set();
+        rowOffsets = [];
+        colOffsets = [];
 
         [].forEach.call(document.querySelectorAll('input'), function(node) {
             var coords = offset(node);
-            rowOffsetsSet.add(coords.y);
-            colOffsetsSet.add(coords.x);
+            coords.y = rowOffsets.addFuzzyUnique(coords.y, tolerance_);
+            coords.x = colOffsets.addFuzzyUnique(coords.x, tolerance_);
 
             node.setAttribute('data-coords', coords.x + ',' + coords.y);
+            !debug_ || (node.value = coords.x + ',' + coords.y);
             node.addEventListener("keydown", instance.keyEvent);
         });
-
-        rowOffsets = [...rowOffsetsSet];
-        colOffsets = [...colOffsetsSet];
 
         rowOffsets.sort(compare);
         colOffsets.sort(compare);
@@ -97,6 +109,11 @@ var ArrowNavigation = (function() {
         if(receivedFocus) {
             e.preventDefault();
         }
+    };
+
+    instance.setup = function(tolerance, debug) {
+        tolerance_ = tolerance;
+        debug_ = debug;
     };
 
     return instance;
