@@ -1,8 +1,8 @@
 var ArrowNavigation = (function() {
-    var instance = {};
-    var rowOffsets, colOffsets;
+    var instance = {},
+    	rowOffsets, colOffsets;
 
-    function offset(elem) {
+    function getOffset(elem) {
         var docElem = window.document.documentElement,
             box = elem.getBoundingClientRect();
 
@@ -38,27 +38,7 @@ var ArrowNavigation = (function() {
         return value;
     };
 
-    var tolerance_ = 0;
-    var debug_ = false;
-    instance.updateOffsets = function() {
-        rowOffsets = [];
-        colOffsets = [];
-
-        [].forEach.call(document.querySelectorAll('input'), function(node) {
-            var coords = offset(node);
-            coords.y = rowOffsets.addFuzzyUnique(coords.y, tolerance_);
-            coords.x = colOffsets.addFuzzyUnique(coords.x, tolerance_);
-
-            node.setAttribute('data-coords', coords.x + ',' + coords.y);
-            !debug_ || (node.value = coords.x + ',' + coords.y);
-            node.addEventListener("keydown", instance.keyEvent);
-        });
-
-        rowOffsets.sort(compare);
-        colOffsets.sort(compare);
-    };
-
-    instance.keyEvent = function(e) {
+    function keyEventHandler(e) {
         var KEY_LEFT = 37,
             KEY_UP = 38,
             KEY_RIGHT = 39,
@@ -68,7 +48,7 @@ var ArrowNavigation = (function() {
             return;
         }
 
-        var coords = this.getAttribute('data-coords').split(','),
+        var coords = e.currentTarget.getAttribute('data-coords').split(','),
             col = Number(coords[0]),
             row = Number(coords[1]),
             colIndex = colOffsets.indexOf(col),
@@ -109,6 +89,27 @@ var ArrowNavigation = (function() {
         if(receivedFocus) {
             e.preventDefault();
         }
+    };
+
+    var tolerance_ = 0,
+    	debug_ = false;
+
+    instance.updateOffsets = function() {
+        rowOffsets = [];
+        colOffsets = [];
+
+        [].forEach.call(document.querySelectorAll('input'), function(node) {
+            var coords = getOffset(node);
+            coords.y = rowOffsets.addFuzzyUnique(coords.y, tolerance_);
+            coords.x = colOffsets.addFuzzyUnique(coords.x, tolerance_);
+
+            node.setAttribute('data-coords', coords.x + ',' + coords.y);
+            !debug_ || (node.value = coords.x + ',' + coords.y);
+            node.addEventListener("keydown", keyEventHandler);
+        });
+
+        rowOffsets.sort(compare);
+        colOffsets.sort(compare);
     };
 
     instance.setup = function(tolerance, debug) {
