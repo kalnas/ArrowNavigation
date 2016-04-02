@@ -1,14 +1,28 @@
-var ArrowNavigation = (function() {
+(function(factory) {
+  //self is the same as the window object except it is also supported in Webworkers.
+  var root = (typeof self == 'object' && self.self === self && self);
+
+  if (typeof define === 'function' && define.amd) {
+    define("ArrowNavigation", [], function() {
+      root.ArrowNavigation = factory(root);
+      return ArrowNavigation;
+    });
+
+  } else {
+    root.ArrowNavigation = factory(root);
+  }
+
+})(function(root) {
     var instance = {},
     	rowOffsets, colOffsets;
 
     function getOffset(elem) {
-        var docElem = window.document.documentElement,
+        var docElem = root.document.documentElement,
             box = elem.getBoundingClientRect();
 
         return {
-            x: box.left + ( window.pageXOffset || docElem.scrollLeft ) - ( docElem.clientLeft || 0 ),
-            y: box.top  + ( window.pageYOffset || docElem.scrollTop )  - ( docElem.clientTop  || 0 )
+            x: box.left + ( root.pageXOffset || docElem.scrollLeft ) - ( docElem.clientLeft || 0 ),
+            y: box.top  + ( root.pageYOffset || docElem.scrollTop )  - ( docElem.clientTop  || 0 )
         };
     }
 
@@ -118,4 +132,4 @@ var ArrowNavigation = (function() {
     };
 
     return instance;
-})();
+});
