@@ -1,14 +1,28 @@
-var ArrowNavigation = (function() {
-    var instance = {};
-    var rowOffsets, colOffsets;
+(function(factory) {
+  //self is the same as the window object except it is also supported in Webworkers.
+  var root = (typeof self == 'object' && self.self === self && self);
 
-    function offset(elem) {
-        var docElem = window.document.documentElement,
+  if (typeof define === 'function' && define.amd) {
+    define("ArrowNavigation", [], function() {
+      root.ArrowNavigation = factory(root);
+      return ArrowNavigation;
+    });
+
+  } else {
+    root.ArrowNavigation = factory(root);
+  }
+
+})(function(root) {
+    var instance = {},
+    	rowOffsets, colOffsets;
+
+    function getOffset(elem) {
+        var docElem = root.document.documentElement,
             box = elem.getBoundingClientRect();
 
         return {
-            x: box.left + ( window.pageXOffset || docElem.scrollLeft ) - ( docElem.clientLeft || 0 ),
-            y: box.top  + ( window.pageYOffset || docElem.scrollTop )  - ( docElem.clientTop  || 0 )
+            x: box.left + ( root.pageXOffset || docElem.scrollLeft ) - ( docElem.clientLeft || 0 ),
+            y: box.top  + ( root.pageYOffset || docElem.scrollTop )  - ( docElem.clientTop  || 0 )
         };
     }
 
@@ -38,27 +52,7 @@ var ArrowNavigation = (function() {
         return value;
     };
 
-    var tolerance_ = 0;
-    var debug_ = false;
-    instance.updateOffsets = function() {
-        rowOffsets = [];
-        colOffsets = [];
-
-        [].forEach.call(document.querySelectorAll('input'), function(node) {
-            var coords = offset(node);
-            coords.y = rowOffsets.addFuzzyUnique(coords.y, tolerance_);
-            coords.x = colOffsets.addFuzzyUnique(coords.x, tolerance_);
-
-            node.setAttribute('data-coords', coords.x + ',' + coords.y);
-            !debug_ || (node.value = coords.x + ',' + coords.y);
-            node.addEventListener("keydown", instance.keyEvent);
-        });
-
-        rowOffsets.sort(compare);
-        colOffsets.sort(compare);
-    };
-
-    instance.keyEvent = function(e) {
+    function keyEventHandler(e) {
         var KEY_LEFT = 37,
             KEY_UP = 38,
             KEY_RIGHT = 39,
@@ -68,7 +62,7 @@ var ArrowNavigation = (function() {
             return;
         }
 
-        var coords = this.getAttribute('data-coords').split(','),
+        var coords = e.currentTarget.getAttribute('data-coords').split(','),
             col = Number(coords[0]),
             row = Number(coords[1]),
             colIndex = colOffsets.indexOf(col),
@@ -111,10 +105,31 @@ var ArrowNavigation = (function() {
         }
     };
 
+    var tolerance_ = 0,
+    	debug_ = false;
+
+    instance.updateOffsets = function() {
+        rowOffsets = [];
+        colOffsets = [];
+
+        [].forEach.call(document.querySelectorAll('input'), function(node) {
+            var coords = getOffset(node);
+            coords.y = rowOffsets.addFuzzyUnique(coords.y, tolerance_);
+            coords.x = colOffsets.addFuzzyUnique(coords.x, tolerance_);
+
+            node.setAttribute('data-coords', coords.x + ',' + coords.y);
+            !debug_ || (node.value = coords.x + ',' + coords.y);
+            node.addEventListener("keydown", keyEventHandler);
+        });
+
+        rowOffsets.sort(compare);
+        colOffsets.sort(compare);
+    };
+
     instance.setup = function(tolerance, debug) {
         tolerance_ = tolerance;
         debug_ = debug;
     };
 
     return instance;
-})();
+});
